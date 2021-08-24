@@ -1,0 +1,62 @@
+{
+    "name": "keboola/db-writer-exasol",
+    "description": "KBC exasol writer",
+    "license": "MIT",
+    "require": {
+        "php": "^7.4",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "ext-pdo": "*",
+        "keboola/db-import-export": "^0.16.1",
+        "keboola/db-writer-common": "^5.9.0",
+        "keboola/php-component": "^8.3",
+        "keboola/storage-api-client": "^12.3"
+    },
+    "require-dev": {
+        "php-parallel-lint/php-parallel-lint": "^1.2",
+        "keboola/coding-standard": ">=13.0",
+        "keboola/datadir-tests": "^5.2",
+        "keboola/php-temp": "^2.0",
+        "phpstan/phpstan": "^0.12.96",
+        "phpunit/phpunit": "^9.5",
+        "symfony/process": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Keboola\\DbWriter\\Exasol\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Keboola\\DbWriter\\Exasol\\Tests\\": "tests/phpunit/",
+            "Keboola\\DbWriter\\Exasol\\FunctionalTests\\": "tests/functional/"
+        }
+    },
+    "scripts": {
+        "tests-phpunit": "phpunit",
+        "tests-datadir": "phpunit tests/functional",
+        "tests": [
+            "@tests-phpunit",
+            "@tests-datadir"
+        ],
+
+        "phpstan": "phpstan analyse ./src ./tests --level=max --no-progress -c phpstan.neon",
+        "phpcs": "phpcs -n --ignore=vendor --extensions=php .",
+        "phpcbf": "phpcbf -n --ignore=vendor --extensions=php .",
+        "phplint": "parallel-lint -j 10 --exclude vendor .",
+        "build": [
+            "@phplint",
+            "@phpcs",
+            "@phpstan",
+            "@tests"
+        ],
+        "ci": [
+            "@composer validate --no-check-publish --no-check-all",
+            "@build"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}

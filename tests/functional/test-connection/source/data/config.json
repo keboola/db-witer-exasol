@@ -1,0 +1,12 @@
+{
+  "action": "testConnection",
+  "parameters": {
+    "db": {
+      "host": "%env(string:EXASOL_HOST)%",
+      "port": "%env(int:EXASOL_PORT)%",
+      "user": "%env(string:EXASOL_USERNAME)%",
+      "#password": "%env(string:EXASOL_PASSWORD)%",
+      "schema": "%env(string:EXASOL_SCHEMA)%"
+    }
+  }
+}

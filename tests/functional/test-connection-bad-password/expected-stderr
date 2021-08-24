@@ -1,0 +1,1 @@
+Error connecting to DB: Connection failed: SQLSTATE[08004] SQLDriverConnect: -373252 [EXASOL][EXASolution driver]Connection exception - authentication failed

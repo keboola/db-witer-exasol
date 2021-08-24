@@ -1,0 +1,15 @@
+version: '3'
+services:
+  dev:
+    build: .
+    volumes:
+      - ./:/code
+      - ./data:/data
+    environment:
+      - KBC_URL
+      - STORAGE_API_TOKEN
+      - EXASOL_HOST
+      - EXASOL_PORT
+      - EXASOL_USERNAME
+      - EXASOL_PASSWORD
+      - EXASOL_SCHEMA
