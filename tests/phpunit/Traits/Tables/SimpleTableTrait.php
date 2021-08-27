@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbWriter\Exasol\Tests\Traits\Tables;
+namespace Keboola\ExasolWriter\Tests\Traits\Tables;
 
-use Keboola\DbWriter\Exasol\Tests\Traits\CreateTableTrait;
-use Keboola\DbWriter\Exasol\Tests\Traits\InsertRowsTrait;
+use Keboola\ExasolWriter\Tests\Traits\CreateTableTrait;
+use Keboola\ExasolWriter\Tests\Traits\InsertRowsTrait;
 
 trait SimpleTableTrait
 {

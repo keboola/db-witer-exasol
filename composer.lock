@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.191.2",
+            "version": "3.191.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "d659144bf8618c891fd01f0f375f1f0b4db21b05"
+                "reference": "63f015b49346cda8e4ac57cc33174744cc116654"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/d659144bf8618c891fd01f0f375f1f0b4db21b05",
-                "reference": "d659144bf8618c891fd01f0f375f1f0b4db21b05",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/63f015b49346cda8e4ac57cc33174744cc116654",
+                "reference": "63f015b49346cda8e4ac57cc33174744cc116654",
                 "shasum": ""
             },
             "require": {
@@ -92,9 +92,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.191.2"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.191.4"
             },
-            "time": "2021-08-23T18:17:20+00:00"
+            "time": "2021-08-25T18:15:26+00:00"
         },
         {
             "name": "doctrine/cache",
@@ -1303,16 +1303,16 @@
         },
         {
             "name": "keboola/table-backend-utils",
-            "version": "v0.15.0",
+            "version": "v0.15.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/php-table-backend-utils.git",
-                "reference": "a561b769c31ce5b2376f23e15c25151e225635ba"
+                "reference": "c677bd3960d07b5a269c3db91b559ece6a828e2a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/php-table-backend-utils/zipball/a561b769c31ce5b2376f23e15c25151e225635ba",
-                "reference": "a561b769c31ce5b2376f23e15c25151e225635ba",
+                "url": "https://api.github.com/repos/keboola/php-table-backend-utils/zipball/c677bd3960d07b5a269c3db91b559ece6a828e2a",
+                "reference": "c677bd3960d07b5a269c3db91b559ece6a828e2a",
                 "shasum": ""
             },
             "require": {
@@ -1343,9 +1343,9 @@
             "description": "Package allows to import files to Snowflake from multiple cloud storages",
             "support": {
                 "issues": "https://github.com/keboola/php-table-backend-utils/issues",
-                "source": "https://github.com/keboola/php-table-backend-utils/tree/v0.15.0"
+                "source": "https://github.com/keboola/php-table-backend-utils/tree/v0.15.1"
             },
-            "time": "2021-08-12T09:33:27+00:00"
+            "time": "2021-08-25T07:49:40+00:00"
         },
         {
             "name": "microsoft/azure-storage-blob",
@@ -2920,12 +2920,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nette/tracy.git",
-                "reference": "4438975223e36dc142e910b9d7a80a7b4737449f"
+                "reference": "8e708de7c611f626c8792d43f1c78812ea24e6f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nette/tracy/zipball/4438975223e36dc142e910b9d7a80a7b4737449f",
-                "reference": "4438975223e36dc142e910b9d7a80a7b4737449f",
+                "url": "https://api.github.com/repos/nette/tracy/zipball/8e708de7c611f626c8792d43f1c78812ea24e6f6",
+                "reference": "8e708de7c611f626c8792d43f1c78812ea24e6f6",
                 "shasum": ""
             },
             "require": {
@@ -2986,7 +2986,7 @@
                 "issues": "https://github.com/nette/tracy/issues",
                 "source": "https://github.com/nette/tracy/tree/v2.8.7"
             },
-            "time": "2021-08-24T15:06:07+00:00"
+            "time": "2021-08-24T16:26:27+00:00"
         }
     ],
     "packages-dev": [

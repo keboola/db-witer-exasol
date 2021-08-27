@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbWriter\Exasol\FunctionalTests;
+namespace Keboola\ExasolWriter\FunctionalTests;
 
 use Keboola\DatadirTests\DatadirTestSpecificationInterface;
 use PDO;
 use RuntimeException;
-use Keboola\DbWriter\Exasol\Tests\Traits\DumpTablesTrait;
-use Keboola\DbWriter\Exasol\Tests\Traits\GetAllTablesTrait;
-use Keboola\DbWriter\Exasol\Tests\Traits\RemoveAllTablesTrait;
+use Keboola\ExasolWriter\Tests\Traits\DumpTablesTrait;
+use Keboola\ExasolWriter\Tests\Traits\GetAllTablesTrait;
+use Keboola\ExasolWriter\Tests\Traits\RemoveAllTablesTrait;
 use Keboola\DatadirTests\DatadirTestCase;
-use Keboola\DbWriter\Exasol\Test\StagingStorageLoader;
-use Keboola\DbWriter\Exasol\Tests\Traits\TestConnectionTrait;
+use Keboola\ExasolWriter\Test\StagingStorageLoader;
+use Keboola\ExasolWriter\Tests\Traits\TestConnectionTrait;
 use Keboola\StorageApi\Client;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
@@ -69,7 +69,8 @@ class DatadirTest extends DatadirTestCase
 
     protected function runScript(string $datadirPath): Process
     {
-        $this->uploadFixtures($datadirPath);
+        // Exasol doesn't support S3 session token, so S3 staging storage cannot be used
+        //$this->uploadFixturesToS3($datadirPath);
         return parent::runScript($datadirPath);
     }
 
@@ -82,7 +83,7 @@ class DatadirTest extends DatadirTestCase
         parent::assertMatchesSpecification($specification, $runProcess, $tempDatadir);
     }
 
-    protected function uploadFixtures(string $datadirPath): void
+    protected function uploadFixturesToS3(string $datadirPath): void
     {
         $stagingStorageLoader = new StagingStorageLoader(
             $datadirPath,
@@ -96,15 +97,23 @@ class DatadirTest extends DatadirTestCase
         try {
             $tables = $finder->files()->in($datadirPath . '/in/tables')->name('*.csv');
             foreach ($tables as $table) {
+                // Load manifest
+                $csvPath = $table->getPathname();
+                $manifestPath = $table->getPathname() . '.manifest';
+                if (!file_exists($manifestPath)) {
+                    throw new RuntimeException(sprintf('Missing manifest "%s".', $manifestPath));
+                }
+                $manifestData = json_decode((string) file_get_contents($manifestPath), true);
+
                 // Upload file to ABS
                 $uploadFileInfo = $stagingStorageLoader->upload(
                     $table->getFilenameWithoutExtension(),
+                    $csvPath,
+                    $manifestData,
                     (string) $this->dataName()
                 );
 
                 // Generate new manifest
-                $manifestPath = $table->getPathname() . '.manifest';
-                $manifestData = json_decode((string) file_get_contents($manifestPath), true);
                 $manifestData[$uploadFileInfo['stagingStorage']] = $uploadFileInfo['manifest'];
 
                 // Remove local file and manifest
@@ -131,7 +140,7 @@ class DatadirTest extends DatadirTestCase
 
         // Dump tables
         foreach ($this->getAllTables() as $table) {
-            $this->dumpTable($table['TABLE_CATALOG'], $table['TABLE_SCHEMA'], $table['TABLE_NAME'], $dumpDir);
+            $this->dumpTable($table['TABLE_SCHEMA'], $table['TABLE_NAME'], $dumpDir);
         }
     }
 }

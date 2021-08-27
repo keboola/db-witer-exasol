@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbWriter\Exasol\Configuration;
+namespace Keboola\ExasolWriter\Configuration;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\NodeBuilder;

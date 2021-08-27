@@ -2,20 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbWriter\Exasol\Tests\Traits;
+namespace Keboola\ExasolWriter\Tests\Traits;
 
 use Keboola\Csv\CsvFile;
-use Keboola\DbWriter\Exasol\ExasolWriter;
+use Keboola\ExasolWriter\ExasolWriter;
+use Keboola\TableBackendUtils\Escaping\Exasol\ExasolQuote;
 use PDO;
 
 trait DumpTablesTrait
 {
     abstract public function getConnection(): PDO;
 
-    public function dumpTable(string $catalog, string $schema, string $name, string $dumpDir): void
+    public function dumpTable(string $schema, string $name, string $dumpDir): void
     {
-        $metadata = $this->getTableMetadata($catalog, $schema, $name);
-        $columns = $this->getColumns($catalog, $schema, $name);
+        $metadata = $this->getTableMetadata($schema, $name);
+        $columns = $this->getColumns($schema, $name);
         $metadata['columns'] = $columns;
 
         // Save create statement
@@ -23,11 +24,10 @@ trait DumpTablesTrait
         file_put_contents(sprintf('%s/%s.%s.metadata.json', $dumpDir, $schema, $name), $metadataJson);
 
         // Dump data
-        $this->dumpTableData($catalog, $schema, $name, $columns, $dumpDir);
+        $this->dumpTableData($schema, $name, $columns, $dumpDir);
     }
 
     private function dumpTableData(
-        string $catalog,
         string $schema,
         string $name,
         array $columns,
@@ -41,19 +41,18 @@ trait DumpTablesTrait
             $columns
         ));
 
-        $orderColumns = [ExasolHelper::quoteIdentifier($columns[0]['name'])];
+        $orderColumns = [ExasolQuote::quoteSingleIdentifier($columns[0]['name'])];
         // order by first two columns
         if (isset($columns[1])) {
-            $orderColumns[] = ExasolHelper::quoteIdentifier($columns[1]['name']);
+            $orderColumns[] = ExasolQuote::quoteSingleIdentifier($columns[1]['name']);
         }
 
         // Write data
         /** @var \PDOStatement $stmt */
         $stmt = $this->getConnection()->query(sprintf(
-            'SELECT * FROM %s.%s.%s ORDER BY %s',
-            ExasolHelper::quoteIdentifier($catalog),
-            ExasolHelper::quoteIdentifier($schema),
-            ExasolHelper::quoteIdentifier($name),
+            'SELECT * FROM %s.%s ORDER BY %s',
+            ExasolQuote::quoteSingleIdentifier($schema),
+            ExasolQuote::quoteSingleIdentifier($name),
             implode(', ', $orderColumns)
         ));
         /** @var array $rows */
@@ -63,15 +62,14 @@ trait DumpTablesTrait
         }
     }
 
-    private function getTableMetadata(string $catalog, string $schema, string $name): array
+    private function getTableMetadata(string $schema, string $name): array
     {
         /** @var \PDOStatement $stmt */
         $stmt = $this->getConnection()->query(sprintf(
-            'SELECT * FROM "INFORMATION_SCHEMA"."TABLES" ' .
-            'WHERE TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s',
-            ExasolHelper::quote($catalog),
-            ExasolHelper::quote($schema),
-            ExasolHelper::quote($name),
+            'SELECT * FROM "EXA_ALL_TABLES" ' .
+            'WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s',
+            ExasolQuote::quote($schema),
+            ExasolQuote::quote($name),
         ));
 
         /** @var array $result */
@@ -82,15 +80,14 @@ trait DumpTablesTrait
         ];
     }
 
-    private function getColumns(string $catalog, string $schema, string $name): array
+    private function getColumns(string $schema, string $name): array
     {
         /** @var \PDOStatement $stmt */
         $stmt = $this->getConnection()->query(sprintf(
-            'SELECT * FROM "INFORMATION_SCHEMA"."COLUMNS" ' .
-            'WHERE TABLE_CATALOG = %s AND TABLE_SCHEMA = %s AND TABLE_NAME = %s',
-            ExasolHelper::quote($catalog),
-            ExasolHelper::quote($schema),
-            ExasolHelper::quote($name),
+            'SELECT * FROM "EXA_ALL_COLUMNS" ' .
+            'WHERE COLUMN_SCHEMA = %s AND COLUMN_TABLE = %s',
+            ExasolQuote::quote($schema),
+            ExasolQuote::quote($name),
         ));
 
         /** @var array $result */
@@ -99,15 +96,10 @@ trait DumpTablesTrait
         return array_map(function (array $column) {
             return [
                 'name' => $column['COLUMN_NAME'],
-                'position' => $column['ORDINAL_POSITION'],
-                'type' => $column['DATA_TYPE'],
-                'is_nullable' => strtoupper($column['IS_NULLABLE']) !== 'NO',
+                'position' => $column['COLUMN_ORDINAL_POSITION'],
+                'type' => $column['COLUMN_TYPE'],
+                'is_nullable' => $column['COLUMN_IS_NULLABLE'] !== '0',
                 'default' => $column['COLUMN_DEFAULT'],
-                'char_max_length' => $column['CHARACTER_MAXIMUM_LENGTH'],
-                'char_octet_length' => $column['CHARACTER_OCTET_LENGTH'],
-                'numeric_precision' => $column['NUMERIC_PRECISION'],
-                'numeric_precision_radix' => $column['NUMERIC_PRECISION_RADIX'],
-                'numeric_scale' => $column['NUMERIC_SCALE'],
             ];
         }, $result);
     }

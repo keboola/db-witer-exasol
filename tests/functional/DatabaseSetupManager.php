@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbWriter\Exasol\FunctionalTests;
+namespace Keboola\ExasolWriter\FunctionalTests;
 
 use PDO;
-use Keboola\DbWriter\Exasol\Tests\Traits\Tables\IncrementalTableTrait;
-use Keboola\DbWriter\Exasol\Tests\Traits\Tables\SimpleTableTrait;
+use Keboola\ExasolWriter\Tests\Traits\Tables\IncrementalTableTrait;
+use Keboola\ExasolWriter\Tests\Traits\Tables\SimpleTableTrait;
 
 class DatabaseSetupManager
 {

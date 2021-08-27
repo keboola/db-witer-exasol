@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-use Keboola\DbWriter\Exasol\Application;
-use Keboola\CommonExceptions\UserExceptionInterface;
 use Keboola\Component\Logger;
+use Keboola\CommonExceptions\UserExceptionInterface;
+use Keboola\ExasolWriter\Component;
 
 require __DIR__ . '/../vendor/autoload.php';
 
 $logger = new Logger();
 try {
-    $app = new Application($logger);
-    echo $app->run();
+    $app = new Component($logger);
+    $app->execute();
     exit(0);
 } catch (UserExceptionInterface $e) {
     $logger->error($e->getMessage());
     exit(1);
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     $logger->critical(
         get_class($e) . ':' . $e->getMessage(),
         [

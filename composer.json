@@ -23,13 +23,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Keboola\\DbWriter\\Exasol\\": "src/"
+            "Keboola\\ExasolWriter\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Keboola\\DbWriter\\Exasol\\Tests\\": "tests/phpunit/",
-            "Keboola\\DbWriter\\Exasol\\FunctionalTests\\": "tests/functional/"
+            "Keboola\\ExasolWriter\\Tests\\": "tests/phpunit/",
+            "Keboola\\ExasolWriter\\FunctionalTests\\": "tests/functional/"
         }
     },
     "scripts": {

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbWriter\Exasol\Tests\Traits;
+namespace Keboola\ExasolWriter\Tests\Traits;
 
-use Keboola\DbWriter\Exasol\ExasolHelper;
+use Keboola\TableBackendUtils\Escaping\Exasol\ExasolQuote;
 use PDO;
 
 trait GetAllTablesTrait
@@ -16,7 +16,7 @@ trait GetAllTablesTrait
         $connection = $this->getConnection();
         $sql = sprintf(
             'SELECT * FROM "EXA_ALL_TABLES" WHERE TABLE_SCHEMA=%s',
-            ExasolHelper::quote((string) getenv('EXASOL_SCHEMA')),
+            ExasolQuote::quote((string) getenv('EXASOL_SCHEMA')),
         );
 
         /** @var \PDOStatement $stmt */

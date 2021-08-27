@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbWriter\Exasol\Tests\Traits;
+namespace Keboola\ExasolWriter\Tests\Traits;
 
-use Keboola\DbWriter\Exasol\ExasolHelper;
+use Keboola\TableBackendUtils\Escaping\Exasol\ExasolQuote;
 use PDO;
 
 trait RemoveAllTablesTrait
@@ -18,8 +18,8 @@ trait RemoveAllTablesTrait
         foreach ($this->getAllTables() as $table) {
             $this->connection->exec(sprintf(
                 'DROP TABLE %s.%s',
-                ExasolHelper::quoteIdentifier($table['TABLE_SCHEMA']),
-                ExasolHelper::quoteIdentifier($table['TABLE_NAME'])
+                ExasolQuote::quoteSingleIdentifier($table['TABLE_SCHEMA']),
+                ExasolQuote::quoteSingleIdentifier($table['TABLE_NAME'])
             ));
         }
     }

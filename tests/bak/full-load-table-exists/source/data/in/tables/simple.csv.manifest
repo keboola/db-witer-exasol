@@ -1,8 +1,0 @@
-{
-  "id": "simple",
-  "columns": [
-    "id",
-    "name",
-    "date_csv"
-  ]
-}

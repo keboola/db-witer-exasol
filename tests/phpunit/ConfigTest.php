@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbWriter\Exasol\Tests;
+namespace Keboola\ExasolWriter\Tests;
 
 use Keboola\CommonExceptions\UserExceptionInterface;
 use Keboola\DbWriter\Configuration\Validator;
-use Keboola\DbWriter\Exasol\Configuration\ConfigRowDefinition;
+use Keboola\ExasolWriter\Configuration\ConfigDefinition;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +17,7 @@ class ConfigTest extends TestCase
      */
     public function testValidConfig(array $configData, array $expectedConfig): void
     {
-        $validator = Validator::getValidator(new ConfigRowDefinition());
+        $validator = Validator::getValidator(new ConfigDefinition());
         $parameters = $validator($configData);
 
         Assert::assertEquals($expectedConfig, $parameters);
@@ -28,7 +28,7 @@ class ConfigTest extends TestCase
      */
     public function testInvalidConfig(array $configData, string $errorMessage): void
     {
-        $validator = Validator::getValidator(new ConfigRowDefinition());
+        $validator = Validator::getValidator(new ConfigDefinition());
 
         $this->expectException(UserExceptionInterface::class);
         $this->expectExceptionMessage($errorMessage);

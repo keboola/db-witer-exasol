@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbWriter\Exasol\Tests\Traits;
+namespace Keboola\ExasolWriter\Tests\Traits;
 
-use Keboola\DbWriter\Exasol\ExasolWriter;
+use Keboola\ExasolWriter\ExasolWriter;
 use PDO;
 
 trait CreateTableTrait

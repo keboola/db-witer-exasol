@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbWriter\Exasol\Test;
+namespace Keboola\ExasolWriter\Test;
 
-use Keboola\DbWriter\Exasol\Application;
+use Keboola\ExasolWriter\Application;
+use Keboola\ExasolWriter\Writer;
+use Keboola\Temp\Temp;
 use RuntimeException;
 use Keboola\Csv\CsvFile;
 use Keboola\StorageApi\Client;
@@ -20,16 +22,20 @@ class StagingStorageLoader
 
     private Client $storageApi;
 
+    private Temp $temp;
+
     public function __construct(string $dataDir, Client $storageApiClient)
     {
         $this->dataDir = $dataDir;
         $this->storageApi = $storageApiClient;
         $this->fileIdCache = @json_decode((string) @file_get_contents(self::CACHE_PATH), true) ?: [];
+        $this->temp = new Temp();
     }
 
     public function __destruct()
     {
         file_put_contents(self::CACHE_PATH, @json_encode($this->fileIdCache));
+        $this->temp->remove();
     }
 
     private function getInputCsv(string $tableId): string
@@ -37,18 +43,25 @@ class StagingStorageLoader
         return sprintf($this->dataDir . '/in/tables/%s.csv', $tableId);
     }
 
-    public function upload(string $tableId, string $testName): array
+    public function upload(string $tableId, string $csvPath, array $manifest, string $testName): array
     {
+        // Create CSV file with header
+        $tablePath = $this->temp->createFile($testName);
+        $header = '"' . implode('","', $manifest['columns']) . '"' . "\n";
+        $rows = (string) file_get_contents($csvPath);
+        file_put_contents($tablePath->getPathname(), $header . $rows);
+        $csvTable = new CsvFile($tablePath);
+
         // Load from cache
         $cacheKey = $testName . '-' . $tableId;
         if (isset($this->fileIdCache[$cacheKey])) {
             $fileId = $this->fileIdCache[$cacheKey];
             try {
-                $fileInfo = $this->storageApi->getFile($fileId);
+                $fileInfo = $this->storageApi->getFile($fileId, (new GetFileOptions())->setFederationToken(true));
                 return [
                     'fileId' => $fileId,
-                    'stagingStorage' => Application::STORAGE_ABS,
-                    'manifest' => $this->getAbsManifest($fileInfo),
+                    'stagingStorage' => Writer::STORAGE_S3,
+                    'manifest' => $this->getS3Manifest($fileInfo),
                 ];
             } catch (\Throwable $e) {
                 // re-upload if an error
@@ -57,7 +70,7 @@ class StagingStorageLoader
 
         // Create bucket
         $filePath = $this->getInputCsv($tableId);
-        $bucketId = 'test-wr-db-synapse';
+        $bucketId = 'test-wr-db-exasol';
         $fullTableId = 'in.c-' . $bucketId . '.' . $tableId;
         if (!$this->storageApi->bucketExists('in.c-' . $bucketId)) {
             $this->storageApi->createBucket($bucketId, Client::STAGE_IN);
@@ -67,40 +80,41 @@ class StagingStorageLoader
         if ($this->storageApi->tableExists($fullTableId)) {
             $this->storageApi->dropTable($fullTableId);
         }
-        $sourceTableId = $this->storageApi->createTable('in.c-' .$bucketId, $tableId, new CsvFile($filePath));
+        $sourceTableId = $this->storageApi->createTable('in.c-' .$bucketId, $tableId, $csvTable);
 
         // Upload
-        $this->storageApi->writeTable($sourceTableId, new CsvFile($filePath));
+        $this->storageApi->writeTable($sourceTableId, $csvTable);
         $job = $this->storageApi->exportTableAsync($sourceTableId, ['gzip' => true]);
         $fileInfo = $this->storageApi->getFile(
             $job['file']['id'],
             (new GetFileOptions())->setFederationToken(true)
         );
 
-        if (!isset($fileInfo['absPath'])) {
-            throw new RuntimeException('Only ABS staging storage is supported.');
+        if (!isset($fileInfo['s3Path'])) {
+            throw new RuntimeException('Only S3 staging storage is supported.');
         }
 
         $result = [
             'fileId' => $job['file']['id'],
-            'stagingStorage' => Application::STORAGE_ABS,
-            'manifest' => $this->getAbsManifest($fileInfo),
+            'stagingStorage' => Writer::STORAGE_S3,
+            'manifest' => $this->getS3Manifest($fileInfo),
         ];
 
         $this->fileIdCache[$cacheKey] = $job['file']['id'];
         return $result;
     }
 
-    private function getAbsManifest(array $fileInfo): array
+    private function getS3Manifest(array $fileInfo): array
     {
         return [
-            'is_sliced' => $fileInfo['isSliced'],
+            'isSliced' => $fileInfo['isSliced'],
             'region' => $fileInfo['region'],
-            'container' => $fileInfo['absPath']['container'],
-            'name' => $fileInfo['isSliced'] ? $fileInfo['absPath']['name'] . 'manifest' : $fileInfo['absPath']['name'],
+            'bucket' => $fileInfo['s3Path']['bucket'],
+            'key' => $fileInfo['isSliced'] ? $fileInfo['s3Path']['key'] . 'manifest' : $fileInfo['s3Path']['key'],
             'credentials' => [
-                'sas_connection_string' => $fileInfo['absCredentials']['SASConnectionString'],
-                'expiration' => $fileInfo['absCredentials']['expiration'],
+                'access_key_id' => $fileInfo['credentials']['AccessKeyId'],
+                'secret_access_key' => $fileInfo['credentials']['SecretAccessKey'],
+                'session_token' => $fileInfo['credentials']['SessionToken'],
             ],
         ];
     }
